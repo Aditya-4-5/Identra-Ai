@@ -11,7 +11,8 @@ face-recognition-models @ git+https://github.com/ageitgey/face_recognition_model
 setuptools<70
 
 # Database / Authentication
-supabase==2.3.0
+
+supabase==2.30.1
 bcrypt
 
 # QR / Image Processing
