@@ -1,33 +1,19 @@
-try:
-    import streamlit as st  # type: ignore[import]
-except ImportError:
-    from types import SimpleNamespace
-    st = SimpleNamespace(
-        write=lambda *args, **kwargs: None,
-        error=lambda *args, **kwargs: None,
-        secrets={},
-    )
+import streamlit as st
+from supabase import Client, create_client
 
-st.write("Config loading...")
 
-try:
-    from supabase import create_client, Client  # type: ignore[import]
-    st.write("Supabase import OK")
-except Exception:
-    try:
-        from supabase_py import create_client, Client  # type: ignore[import]
-        st.write("Supabase_py import OK")
-    except Exception as e:
-        st.error(f"Import error: {repr(e)}")
-        raise
+def _get_required_secret(name: str) -> str:
+    value = st.secrets.get(name)
+    if not value:
+        st.error(
+            f"{name} is missing. Add it in .streamlit/secrets.toml locally "
+            "and in Streamlit Cloud app secrets for deployment."
+        )
+        raise RuntimeError(f"Missing Streamlit secret: {name}")
+    return str(value)
 
-try:
-    url = st.secrets["SUPABASE_URL"]
-    key = st.secrets["SUPABASE_KEY"]
-    st.write("Secrets found")
-except Exception as e:
-    st.error(f"Secrets error: {repr(e)}")
-    raise
+
+url = _get_required_secret("SUPABASE_URL")
+key = _get_required_secret("SUPABASE_KEY")
 
 supabase: Client = create_client(url, key)
-st.write("Client created")

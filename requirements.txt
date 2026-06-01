@@ -5,13 +5,10 @@ pandas
 
 # Face Recognition
 scikit-learn
-face-recognition
-dlib-bin
 face-recognition-models @ git+https://github.com/ageitgey/face_recognition_models
 setuptools<70
 
 # Database / Authentication
-
 supabase==2.30.1
 bcrypt
 

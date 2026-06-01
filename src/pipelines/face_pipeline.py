@@ -1,16 +1,27 @@
-
-
-import dlib
 import numpy as np
-import face_recognition_models
 from sklearn.svm import SVC
 import streamlit as st
 
 from src.database.db import get_all_students
 
 
+def _load_face_dependencies():
+    try:
+        import dlib
+        import face_recognition_models
+    except ImportError as exc:
+        st.error(
+            "Face recognition dependencies are not installed on this server. "
+            "Install dlib and face-recognition-models to use face attendance."
+        )
+        raise RuntimeError("Missing face recognition dependencies") from exc
+
+    return dlib, face_recognition_models
+
+
 @st.cache_resource
 def load_dlib_models():
+    dlib, face_recognition_models = _load_face_dependencies()
     detector = dlib.get_frontal_face_detector() 
 
 
@@ -25,7 +36,11 @@ def load_dlib_models():
     return detector, sp, facerec
 
 def get_face_embeddings(image_np):
-    detector, sp, facerec = load_dlib_models()
+    try:
+        detector, sp, facerec = load_dlib_models()
+    except RuntimeError:
+        return []
+
     faces = detector(image_np, 1)
 
     encodings= []
@@ -104,4 +119,3 @@ def predict_attendance(class_image_np):
         if best_match_score <= resemblance_threshold:
             detected_student[predicted_id] = True
     return detected_student, all_students, len(encodings)
-
