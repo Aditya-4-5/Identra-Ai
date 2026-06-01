@@ -4,6 +4,7 @@ numpy
 pandas
 
 # Face Recognition
+dlib==19.24.6
 scikit-learn
 face-recognition-models @ git+https://github.com/ageitgey/face_recognition_models
 setuptools<70
