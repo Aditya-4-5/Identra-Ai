@@ -152,7 +152,7 @@ def teacher_dashboard():
         font-size: 18px;
         font-weight: bold;
     ">
-        👨‍🏫 Welcome {teacher_data['name']}
+        👨‍🏫 Welcome Back, {teacher_data['name']}
     </marquee>
 </div>
 """, unsafe_allow_html=True)
