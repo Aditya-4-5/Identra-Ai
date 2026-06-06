@@ -138,29 +138,24 @@ def teacher_dashboard():
     header_dashboard()
 
     st.markdown(f"""
-    <div style="
-        position: fixed;
-        top: 40px;
-        right: 60px;
-        width: 160px;
-        height: 160px;
-        border-radius: 50%;
-        background: radial-gradient(circle at top, #1e293b, #020617);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
+<div style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 99999;
+    background: #0f172a;
+">
+    <marquee style="
         color: white;
-        font-weight: 600;
-        box-shadow: 0 0 25px rgba(0,255,200,0.25);
-        border: 1px solid rgba(255,255,255,0.1);
-        z-index: 9999;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
     ">
-        Welcome 👋<br>{teacher_data['name']}
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.write("") 
+        👨‍🏫 Welcome {teacher_data['name']}
+    </marquee>
+</div>
+""", unsafe_allow_html=True)
 
     if "current_teacher_tab" not in st.session_state:
         st.session_state.current_teacher_tab = 'take_attendance'
