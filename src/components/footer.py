@@ -2,49 +2,56 @@ import streamlit as st
 
 
 def footer_home():
+
     st.markdown("""
     <style>
-    .custom-footer {
-        background-color: #0f172a;
-        color: white;
-        padding: 40px 30px 15px 30px;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        margin-top: 60px;
+    .custom-footer{
+        margin-top:60px;
+        padding:40px 30px 20px 30px;
+        background:#0f172a;
+        border-top:1px solid rgba(255,255,255,0.1);
+        color:white;
+        border-radius:15px;
     }
 
-    .footer-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 30px;
+    .footer-grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+        gap:30px;
     }
 
-    .footer-title {
-        font-size: 22px;
-        font-weight: bold;
-        color: #22d3ee;
-        margin-bottom: 15px;
+    .footer-title{
+        color:#2EF2C3;
+        font-size:24px;
+        font-weight:bold;
+        margin-bottom:10px;
     }
 
-    .footer-heading {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 15px;
+    .footer-heading{
+        color:white;
+        font-size:18px;
+        font-weight:600;
+        margin-bottom:10px;
     }
 
-    .footer-text {
-        color: #cbd5e1;
-        line-height: 1.8;
+    .footer-text{
+        color:#cbd5e1;
+        line-height:1.8;
+        font-size:14px;
     }
 
-    .copyright {
-        text-align: center;
-        margin-top: 30px;
-        color: #94a3b8;
-        font-size: 14px;
+    .copyright{
+        text-align:center;
+        margin-top:30px;
+        color:#94a3b8;
+        font-size:14px;
+        border-top:1px solid rgba(255,255,255,0.08);
+        padding-top:15px;
     }
     </style>
 
     <div class="custom-footer">
+
         <div class="footer-grid">
 
             <div>
@@ -87,9 +94,10 @@ def footer_home():
         </div>
 
         <div class="copyright">
-            © 2025 IDENTRA | Recognize • Analyze • Automate <br>
+            © 2025 IDENTRA | Recognize • Analyze • Automate<br>
             Developed by ADI 🚀
         </div>
+
     </div>
     """, unsafe_allow_html=True)
 
