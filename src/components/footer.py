@@ -7,7 +7,9 @@ def footer_home():
         """
         <div style="text-align:center; margin-top:20px;">
             <p style="color:white; font-weight:bold; font-size:16px;">
-                Created by ADI !!
+                Developed by ADI 🚀 !! <br>
+                A Smart AI Attendance Management System<br>
+                powered by Face Recognition & Automation.
             </p>
         </div>
         """,
@@ -21,8 +23,9 @@ def footer_dashboard():
         """
         <div style="text-align:center; margin-top:20px;">
             <p style="color:white; font-weight:bold; font-size:16px;">
-                Created by ADI !! A Smart AI Attendance Management System<br>
-                    powered by Face Recognition & Automation.
+                Developed by ADI 🚀 !! <br>
+                A Smart AI Attendance Management System<br>
+                powered by Face Recognition & Automation.
             </p>
         </div>
         """,
