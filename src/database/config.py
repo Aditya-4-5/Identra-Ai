@@ -13,7 +13,14 @@ def _get_required_secret(name: str) -> str:
     return str(value)
 
 
-url = _get_required_secret("SUPABASE_URL")
-key = _get_required_secret("SUPABASE_KEY")
+@st.cache_resource(show_spinner=False)
+def get_supabase_client() -> Client:
+    """Return a shared client, recreated by reset_supabase_client after failures."""
+    url = _get_required_secret("SUPABASE_URL")
+    key = _get_required_secret("SUPABASE_KEY")
+    return create_client(url, key)
 
-supabase: Client = create_client(url, key)
+
+def reset_supabase_client() -> Client:
+    get_supabase_client.clear()
+    return get_supabase_client()

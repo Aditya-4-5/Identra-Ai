@@ -1,25 +1,33 @@
-from resemblyzer import VoiceEncoder, preprocess_wav
 import numpy as np 
 import io
-import librosa
 import streamlit as st
 
 
 @st.cache_resource
 def load_voice_encoder():
+    from resemblyzer import VoiceEncoder
+
     return VoiceEncoder()
+
+
+def _load_audio_dependencies():
+    import librosa
+    from resemblyzer import preprocess_wav
+
+    return librosa, preprocess_wav
 
 
 def get_voice_embedding(audio_bytes):
     try:
         encoder = load_voice_encoder()
+        librosa, preprocess_wav = _load_audio_dependencies()
 
         audio, sr = librosa.load(io.BytesIO(audio_bytes), sr=16000)
         wav = preprocess_wav(audio)
         embedding = encoder.embed_utterance(wav)
         return embedding.tolist()
-    except Exception as e:
-        st.error('Voice recog error')
+    except Exception:
+        st.error('Voice recognition failed. Please use a clear recording and try again.')
         return None
     
 
@@ -48,6 +56,7 @@ def process_bulk_audio(audio_bytes, candidates_dict, threshold=0.65):
 
     try:
         encoder = load_voice_encoder()
+        librosa, preprocess_wav = _load_audio_dependencies()
 
         audio, sr = librosa.load(io.BytesIO(audio_bytes), sr=16000)
         segments = librosa.effects.split(audio, top_db=30)
@@ -71,6 +80,6 @@ def process_bulk_audio(audio_bytes, candidates_dict, threshold=0.65):
                     identified_results[sid] = score
 
         return identified_results
-    except Exception as e:
-        st.error('Bulk process error')
+    except Exception:
+        st.error('Audio analysis failed. Please use a clear recording and try again.')
         return {}

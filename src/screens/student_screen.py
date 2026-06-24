@@ -8,7 +8,6 @@ import numpy as np
 from src.pipelines.face_pipeline import predict_attendance, get_face_embeddings, train_classifier
 from src.pipelines.voice_pipeline import get_voice_embedding
 from src.database.db import get_all_students, create_student, get_student_subjects, get_student_attendance, unenroll_student_to_subject
-import time
 
 from src.components.dialog_enroll import enroll_dialog
 from src.components.subject_card import subject_card
@@ -101,7 +100,7 @@ def student_dashboard():
             del st.session_state.student_data
             st.rerun()
 
-    st.space()
+    st.write("")
 
     c1, c2 = st.columns(2)
     with c1:
@@ -170,14 +169,14 @@ def student_screen():
     header_dashboard()
     st.header('🔐 Login using FaceID')
 
-    st.space()
-    st.space()
+    st.write("")
+    st.write("")
 
     show_registration = False
     photo_source = st.camera_input("📷 Position your face")
 
     if photo_source:
-        img = np.array(Image.open(photo_source))
+        img = np.array(Image.open(photo_source).convert("RGB"))
 
         with st.spinner('🤖 AI is scanning...'):
             detected, all_ids, num_faces = predict_attendance(img)
@@ -197,7 +196,6 @@ def student_screen():
                         st.session_state.user_role = 'student'
                         st.session_state.student_data = student
                         st.toast(f'Welcome {student["name"]}')
-                        time.sleep(1)
                         st.rerun()
                 else:
                     st.info('Face not recognized! Register below.')
@@ -216,7 +214,7 @@ def student_screen():
             if st.button('Create Account', type='primary'):
                 if new_name:
                     with st.spinner('Creating profile...'):
-                        img = np.array(Image.open(photo_source))
+                        img = np.array(Image.open(photo_source).convert("RGB"))
                         encodings = get_face_embeddings(img)
 
                         if encodings:
@@ -224,7 +222,7 @@ def student_screen():
 
                             voice_emb = None
                             if audio_data:
-                                voice_emb = get_voice_embedding(audio_data.read())
+                                voice_emb = get_voice_embedding(audio_data.getvalue())
 
                             response_data = create_student(
                                 new_name,
@@ -238,15 +236,14 @@ def student_screen():
                                 st.session_state.user_role = 'student'
                                 st.session_state.student_data = response_data[0]
                                 st.toast(f'Profile Created! Hi {new_name}!')
-                                time.sleep(1)
                                 st.rerun()
                         else:
                             st.error('Face capture failed')
                 else:
                     st.warning('Please enter your name!')
 
-    st.space()
-    st.space()
+    st.write("")
+    st.write("")
 
     col1, col2, col3 = st.columns([1,2,1])
     with col2:

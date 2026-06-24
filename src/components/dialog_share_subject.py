@@ -1,10 +1,31 @@
 import streamlit as st
 import segno
 import io
+from urllib.parse import quote
+
+from src.database.db import normalize_subject_code
+
+
+def _get_app_base_url():
+    try:
+        host = st.context.headers.get("host")
+        proto = st.context.headers.get("x-forwarded-proto", "https")
+        if host:
+            return f"{proto}://{host}".rstrip("/")
+    except Exception:
+        pass
+
+    configured_url = st.secrets.get("APP_URL")
+    if configured_url:
+        return str(configured_url).rstrip("/")
+
+    return "https://identra-main.streamlit.app"
 
 
 @st.dialog("Share Class Link")
 def share_subject_dialog(subject_name, subject_code):
+    subject_code = normalize_subject_code(subject_code)
+    join_url = f"{_get_app_base_url()}/?join-code={quote(subject_code)}"
 
     # Apna actual Streamlit app URL yahan rakho
     app_domain = "https://identra-ai.streamlit.app"

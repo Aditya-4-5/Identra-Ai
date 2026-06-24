@@ -3,7 +3,14 @@ from src.ui.base_layout import style_background_dashboard, style_base_layout
 from src.components.header import header_dashboard
 from src.components.footer import footer_dashboard
 from src.components.subject_card import subject_card
-from src.database.db import check_teacher_exists, create_teacher, teacher_login, get_teacher_subjects, get_attendance_for_teacher
+from src.database.db import (
+    check_teacher_exists,
+    create_teacher,
+    get_attendance_for_teacher,
+    get_enrolled_students,
+    get_teacher_subjects,
+    teacher_login,
+)
 from src.components.dialog_create_subject import create_subject_dialog
 from src.components.dialog_share_subject import share_subject_dialog
 from src.components.dialog_add_photo import add_photos_dialog
@@ -11,8 +18,7 @@ from src.pipelines.face_pipeline import predict_attendance
 from src.components.dialog_attendance_results import attendance_result_dialog
 import numpy as np  # type: ignore[import]
 import pandas as pd  # type: ignore[import]
-from datetime import datetime
-from src.database.config import supabase
+from datetime import datetime, timezone
 
 def inject_pro_ui():
     st.markdown("""
@@ -267,6 +273,7 @@ def teacher_tab_take_attendance():
     with c1:
         if st.button('Clear all photos', type='tertiary', icon=':material/delete:', use_container_width=True, disabled=not has_photos):
             st.session_state.attendance_images = []
+            st.session_state.attendance_image_hashes = set()
             st.rerun()  # FIX: rerun so gallery clears immediately
 
     with c2:
@@ -283,14 +290,13 @@ def teacher_tab_take_attendance():
                             student_id = int(sid)
                             all_detected_ids.setdefault(student_id, []).append(f"Photo {idx+1}")
 
-                enrolled_res = supabase.table('subject_students').select("*, students(*)").eq('subject_id', selected_subject_id).execute()
-                enrolled_students = enrolled_res.data
+                enrolled_students = get_enrolled_students(selected_subject_id)
 
                 if not enrolled_students:
                     st.warning('No students enrolled in this course')
                 else:
                     results, attendance_to_log = [], []
-                    current_timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                    current_timestamp = datetime.now(timezone.utc).isoformat()
 
                     for node in enrolled_students:
                         student = node['students']
@@ -368,10 +374,17 @@ def teacher_tab_attendance_records():
 
     for r in records:
         ts = r.get('timestamp')
+        try:
+            parsed_time = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+            time_label = parsed_time.astimezone().strftime("%Y-%m-%d %I:%M %p")
+        except (TypeError, ValueError):
+            parsed_time = None
+            time_label = "N/A"
 
         data.append({
-            "ts_group": ts.split(".")[0] if ts else None,
-            "Time": datetime.fromisoformat(ts).strftime("%Y-%m-%d %I:%M %p") if ts else "N/A",
+            "ts_group": str(ts) if ts else "unknown",
+            "sort_time": parsed_time.timestamp() if parsed_time else 0,
+            "Time": time_label,
             "Subject": r['subjects']['name'],
             "Subject Code": r['subjects']['subject_code'],
             "is_present": bool(r.get('is_present', False))
@@ -380,7 +393,7 @@ def teacher_tab_attendance_records():
     df = pd.DataFrame(data)
 
     summary = (
-        df.groupby(['ts_group', 'Time', 'Subject', 'Subject Code'])
+        df.groupby(['ts_group', 'sort_time', 'Time', 'Subject', 'Subject Code'])
         .agg(
             Present_Count=('is_present', 'sum'),
             Total_Count=('is_present', 'count')
@@ -393,7 +406,7 @@ def teacher_tab_attendance_records():
     )
 
     display_df = (
-        summary.sort_values(by='ts_group', ascending=False)
+        summary.sort_values(by='sort_time', ascending=False)
         [['Time', 'Subject', 'Subject Code', 'Attendance Stats']]
     )
 
@@ -489,8 +502,8 @@ def register_teacher(teacher_username, teacher_name, teacher_pass, teacher_pass_
     try:
         create_teacher(teacher_username, teacher_pass, teacher_name)
         return True, "Successfully Created! Login Now"
-    except Exception:
-        return False, "Unexpected Error!"
+    except Exception as exc:
+        return False, str(exc)
 
 
 def teacher_screen_register():
@@ -517,8 +530,6 @@ def teacher_screen_register():
             )
             if success:
                 st.success(message)
-                import time
-                time.sleep(2)
                 st.session_state.teacher_login_type = "login"
                 st.rerun()  # FIX: rerun to go back to login screen
             else:

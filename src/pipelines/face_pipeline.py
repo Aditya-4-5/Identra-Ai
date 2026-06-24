@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.svm import SVC
 import streamlit as st
 
 from src.database.db import get_all_students
@@ -52,7 +51,7 @@ def get_face_embeddings(image_np):
         encodings.append(np.array(face_descriptor))
     return encodings
 
-@st.cache_resource
+@st.cache_resource(ttl=300, show_spinner=False)
 def get_trained_model():
     X = []
     y = []
@@ -72,18 +71,11 @@ def get_trained_model():
     if len(X) ==0:
         return 0
     
-    clf = SVC(kernel='linear', probability=True, class_weight='balanced')
-
-    try:
-        clf.fit(X, y)
-    except ValueError:
-        pass
-
-    return {'clf': clf, 'X':X, "y":y}
+    return {'X': np.asarray(X, dtype=np.float64), "y": y}
 
 
 def train_classifier():
-    st.cache_resource.clear()
+    get_trained_model.clear()
     model_data = get_trained_model()
     return bool(model_data)
 
@@ -98,21 +90,16 @@ def predict_attendance(class_image_np):
     if not model_data:
         return detected_student, [], len(encodings)
     
-    clf = model_data['clf']
     X_train = model_data['X']
     y_train = model_data['y']
 
     all_students = sorted(list(set(y_train)))
 
     for encoding in encodings:
-        if len(all_students)>= 2:
-            predicted_id= int(clf.predict([encoding])[0])
-        else:
-            predicted_id = int(all_students[0])
-
-        student_embedding = X_train[y_train.index(predicted_id)]
-
-        best_match_score = np.linalg.norm(student_embedding - encoding)
+        distances = np.linalg.norm(X_train - encoding, axis=1)
+        best_index = int(np.argmin(distances))
+        predicted_id = int(y_train[best_index])
+        best_match_score = float(distances[best_index])
 
         resemblance_threshold = 0.6
 

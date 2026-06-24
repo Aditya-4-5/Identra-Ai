@@ -1,5 +1,4 @@
 import streamlit as st
-import time
 from src.components.header import header_home
 from src.components.footer import footer_home
 from src.ui.base_layout import style_base_layout, style_background_home
@@ -9,7 +8,7 @@ def home_screen():
     if "loaded" not in st.session_state:
         st.session_state.loaded = False
 
-    if not st.session_state.loaded:
+    if False and not st.session_state.loaded:
         st.markdown("""
         <div class="full-loader">
             <div class="loader-line"></div>
@@ -18,7 +17,6 @@ def home_screen():
         """, unsafe_allow_html=True)
 
         _inject_home_theme()  
-        time.sleep(2)
         st.session_state.loaded = True
         st.rerun()
 
