@@ -13,6 +13,7 @@ def subject_card(name, code, section, stats=None, footer_callback=None):
             html += f'<div style="background: #EB459E10; padding:5px 12px; border-radius:12px; font-size:0.9rem; color:#1e293b;">{icon} <b>{value}</b> {label}</div>'
         html += "</div>"
 
+    html += "</div>"
     st.markdown(html, unsafe_allow_html=True)
 
     if footer_callback:
